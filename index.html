@@ -89,6 +89,20 @@ html,body{height:100%;background:var(--ink);font-family:'Crimson Pro',serif;colo
 .hist-fill.mid{background:rgba(255,183,77,0.35)}
 .hist-fill.low{background:rgba(192,57,43,0.2)}
 .hist-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--parchment-dim)}
+
+/* Cards */
+.card-display{background:linear-gradient(135deg,var(--ink2),var(--ink3));border:1px solid rgba(76,175,80,0.3);border-radius:14px;padding:32px 24px;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;margin-bottom:16px}
+.card-display:active{border-color:var(--green);background:linear-gradient(135deg,var(--ink3),var(--ink2))}
+.card-text{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--parchment);text-align:center;line-height:1.6;padding:0 8px}
+.card-hint{font-size:0.65rem;color:rgba(42,184,204,0.35);margin-top:16px;letter-spacing:1px}
+.card-item{display:flex;align-items:center;padding:10px 14px;background:var(--ink2);border:1px solid rgba(42,184,204,0.1);border-left:3px solid var(--green);border-radius:0 8px 8px 0;margin-bottom:6px}
+.card-item-text{flex:1;font-size:0.85rem;color:var(--parchment-dim);line-height:1.4}
+.card-item-del{background:none;border:none;color:rgba(42,184,204,0.45);font-size:1rem;cursor:pointer;padding:4px 8px}
+.card-add{margin-top:16px}
+.card-input{width:100%;background:rgba(42,184,204,0.06);border:1px solid rgba(42,184,204,0.65);border-radius:8px;padding:10px 12px;color:var(--parchment);font-family:'Crimson Pro',serif;font-size:0.88rem;outline:none;resize:none}
+.card-input::placeholder{color:rgba(42,184,204,0.45)}
+.card-save{width:100%;padding:10px;margin-top:8px;background:var(--green-dim);border:1px solid rgba(76,175,80,0.4);border-radius:8px;color:var(--green-bright);font-family:'Playfair Display',serif;font-size:0.88rem;cursor:pointer;letter-spacing:1px}
+.card-empty{text-align:center;color:rgba(42,184,204,0.4);font-size:0.88rem;padding:20px;font-style:italic}
 </style>
 </head>
 <body>
@@ -97,6 +111,7 @@ html,body{height:100%;background:var(--ink);font-family:'Crimson Pro',serif;colo
   <div id="tab-bar">
     <button class="tab-btn active" onclick="showTab('today')">Today</button>
     <button class="tab-btn" onclick="showTab('history')">History</button>
+    <button class="tab-btn" onclick="showTab('cards')">Cards</button>
   </div>
 
   <div id="tab-today" class="tab-view active">
@@ -124,6 +139,20 @@ html,body{height:100%;background:var(--ink);font-family:'Crimson Pro',serif;colo
     <div id="historyList"></div>
   </div>
 </div>
+  <div id="tab-cards" class="tab-view">
+    <div class="card-display" id="cardDisplay" onclick="nextCard()">
+      <div class="card-text" id="cardText"></div>
+      <div class="card-hint">tap for next</div>
+    </div>
+    <div class="gold-line"></div>
+    <div class="section-title">Your cards</div>
+    <div id="cardList"></div>
+    <div class="card-add">
+      <textarea id="cardInput" class="card-input" rows="2" placeholder="Add a reason to succeed…"></textarea>
+      <button class="card-save" onclick="addCard()">Add card</button>
+    </div>
+  </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -309,13 +338,80 @@ function changeDay(delta){
   render();
 }
 
+// Cards
+let currentCardIndex = 0;
+
+function getCards(){
+  const d = ld();
+  return d.cards || [];
+}
+function saveCards(cards){
+  const d = ld();
+  d.cards = cards;
+  sv(d);
+}
+function addCard(){
+  const input = document.getElementById('cardInput');
+  const text = input.value.trim();
+  if(!text){toast('Write a reason first');return;}
+  const cards = getCards();
+  cards.push(text);
+  saveCards(cards);
+  input.value = '';
+  renderCards();
+  toast('Card added');
+}
+function deleteCard(idx){
+  const cards = getCards();
+  cards.splice(idx, 1);
+  saveCards(cards);
+  if(currentCardIndex >= cards.length) currentCardIndex = 0;
+  renderCards();
+}
+function nextCard(){
+  const cards = getCards();
+  if(cards.length === 0) return;
+  currentCardIndex = (currentCardIndex + 1) % cards.length;
+  renderCardDisplay();
+}
+function renderCardDisplay(){
+  const cards = getCards();
+  const textEl = document.getElementById('cardText');
+  if(cards.length === 0){
+    textEl.textContent = 'Add your reasons to succeed below';
+    return;
+  }
+  if(currentCardIndex >= cards.length) currentCardIndex = 0;
+  textEl.textContent = cards[currentCardIndex];
+}
+function renderCards(){
+  renderCardDisplay();
+  const cards = getCards();
+  let html = '';
+  if(cards.length === 0){
+    html = '<div class="card-empty">No cards yet — add your first reason below</div>';
+  } else {
+    cards.forEach((c, i) => {
+      html += `<div class="card-item">
+        <div class="card-item-text">${c.replace(/</g,'&lt;')}</div>
+        <button class="card-item-del" onclick="deleteCard(${i})">×</button>
+      </div>`;
+    });
+  }
+  document.getElementById('cardList').innerHTML = html;
+}
+
 function showTab(tab){
+  const tabs = ['today','history','cards'];
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (tab==='today'&&i===0)||(tab==='history'&&i===1));
+    b.classList.toggle('active', tabs[i]===tab);
   });
-  document.getElementById('tab-today').classList.toggle('active', tab==='today');
-  document.getElementById('tab-history').classList.toggle('active', tab==='history');
+  tabs.forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active', t===tab);
+  });
   if(tab==='history') renderHistory();
+  if(tab==='cards') renderCards();
 }
 
 function toast(msg){
