@@ -7,15 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Daily</title>
-<link rel="apple-touch-icon" href="https://patalavaca.github.io/daily/icon.png"><link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAEiklEQVR4nO3dwXXcRhBF0ZJXWmmllJyKQ3AQDsGpODh5I8oyxSEHGGBQ1f/eAMjG0X/gOUNJ/enzl6/fCkL9dvUB4EoCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgC4FR//PPn1Ud4lwA4zcv4O0cgAE7xevRdIxAAh7s19o4RCIBDfTTybhEIgMPcO+5OEQiAQ2wddZcIBMDD9o65QwQC4CGPjvjqCATAbkeN98oIBMAuR4/2qggEwGZnjPXv3/86/GveQwBsstL4qwTABquNv0oA3GnF8VcJgDusOv4qAfCBlcdfJQDesfr4qwTADQnjrxIAb0gZf5UAeCVp/FUC4Cdp468SAN8ljr9KAFTu+KsEEC95/FUCiHb1P0bpQAChzhr/pLd/lQAiGf9/BBDG+P9PAEGM/1cCCGH8bxNAAOO/TQCLM/73CWBhPuf/mAAWdeb4V3n7VwlgScZ/PwEsxvi3EcBCjH87ASzC+PcRwAKMfz8BDGf8jxHAYD7nf9wyAaSN4eznTXj7Vy0SwIQbyY9k/McZH8CUG8mPYvzHGh3ApBvJj2D8xxsbwLQbyR9l/OcYGcDEG8kfYfznGRfA1BvJ9zL+c40KYPKN5HtMPfckYwKYfiP5Vs84b/rbv2pIACvcSL6F8T9P+wBWuZH8Xsb/XO0DOEPXCIz/+SIDqOoXgfFfIzaAqj4RGP91ogOouj4C479WfABV10VwdXwI4Idnj/FZ38/b/30C+MmzRmn8fQjglbPHafy9COANZ43U+PsRwA1TfwNt/Nu0D+DKP9BpfwfJ+LdrH0DV7AiMv7cRAVTNjMD4+xsTQNWsCPySa4ZRAVTNiOCZ4/f2f8y4AKp6R2D8s4wMoKpnBMY/z9gAqnpFYPwzjQ6gqkcExj/Xp89fvn67+hBHSPjUxfiPN/4nwIvVx7H6811lmQCqjITtlgqgas0IVnymLpYLoGqtwaz0LB0tGUDVGsNZ4Rm6WzaAqtkDmnz2SZYOoGrmkCaeearlA6iaNahJZ11BRABVM4Y14YyriQmgysD4VVQAVX0j6Hqu1cUFUNVvbN3OkyQygKo+o+tyjlSxAVRdP76rvz/hAVRdN0Lj7yE+gKrnj9H4+xDAd88apfH3IoCfGGceAbxyZgQC60cAbzhjqMbfkwBuOHKwxt+XAN5xxHCNvzcBfOCRARt/fwK4w54hG/8MArjTlkEb/xwC2MCw1yOAjT6KQCSzCGCHWyM3/nkEsNPrsRv/TAJ4wMvojX+uZf57dNjDTwCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBoAiCaAIgmAKIJgGgCIJoAiCYAogmAaAIgmgCIJgCiCYBo/wLBhXM2dgAMAgAAAABJRU5ErkJggg==">
-<script>
-  const manifest = "{\"name\": \"Daily\", \"short_name\": \"Daily\", \"start_url\": \".\", \"display\": \"standalone\", \"background_color\": \"#080E14\", \"theme_color\": \"#080E14\", \"icons\": [{\"src\": \"https://patalavaca.github.io/daily/icon.png\", \"sizes\": \"192x192\", \"type\": \"image/png\"}]}";
-  const blob = new Blob([manifest], {type: 'application/json'});
-  const link = document.createElement('link');
-  link.rel = 'manifest';
-  link.href = URL.createObjectURL(blob);
-  document.head.appendChild(link);
-</script>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
