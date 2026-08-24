@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080E14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Daily</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAnElEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvwZdYAABkjPJHAAAAABJRU5ErkJggg==">
+<script>
+  const manifest = "{\"name\": \"Daily\", \"short_name\": \"Daily\", \"start_url\": \".\", \"display\": \"standalone\", \"background_color\": \"#080E14\", \"theme_color\": \"#080E14\", \"icons\": [{\"src\": \"icon.png\", \"sizes\": \"192x192\", \"type\": \"image/png\"}]}";
+  const blob = new Blob([manifest], {type: 'application/json'});
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(blob);
+  document.head.appendChild(link);
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--ink:#080E14;--ink2:#0E1820;--ink3:#162030;--teal:#2AB8CC;--teal-dim:rgba(42,184,204,0.12);--green:#4CAF50;--green-dim:rgba(76,175,80,0.15);--green-bright:#6EC98A;--amber:#FFB74D;--amber-dim:rgba(255,183,77,0.15);--parchment:#E8F4F8;--parchment-dim:rgba(232,244,248,0.85)}
+html,body{height:100%;background:var(--ink);font-family:'Crimson Pro',serif;color:var(--parchment);overflow:hidden}
+#header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--ink);border-bottom:1px solid rgba(42,184,204,0.65);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between}
+#header h1{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green-bright);font-weight:400;letter-spacing:2px}
+#main{position:fixed;top:52px;left:0;right:0;bottom:0;overflow-y:auto;padding:16px 16px 80px;scrollbar-width:thin;scrollbar-color:rgba(42,184,204,0.45) transparent}
+
+/* Date nav */
+.date-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+.date-nav button{background:none;border:none;color:var(--teal);font-size:1.4rem;cursor:pointer;padding:6px 10px}
+.date-nav button:disabled{opacity:0.2;cursor:default}
+.date-label{font-family:'Playfair Display',serif;font-size:1rem;color:var(--parchment);min-width:160px;text-align:center}
+.date-sub{font-size:0.72rem;color:rgba(42,184,204,0.55);text-align:center;margin-top:2px}
+
+/* Section headers */
+.section-title{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(42,184,204,0.6);margin:20px 0 12px}
+
+/* Habit rows */
+.habit-row{display:flex;align-items:center;padding:12px 14px;background:var(--ink2);border:1px solid rgba(42,184,204,0.1);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;-webkit-user-select:none;user-select:none}
+.habit-row:active{background:var(--teal-dim)}
+.habit-row.done{border-color:rgba(76,175,80,0.4);background:var(--green-dim)}
+.habit-icon{font-size:1.3rem;width:36px;text-align:center;flex-shrink:0}
+.habit-info{flex:1;margin-left:8px}
+.habit-name{font-size:0.9rem;color:var(--parchment)}
+.habit-row.done .habit-name{color:var(--green-bright)}
+.habit-target{font-size:0.7rem;color:rgba(42,184,204,0.5);margin-top:2px}
+.habit-check{width:28px;height:28px;border-radius:50%;border:2px solid rgba(42,184,204,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.habit-row.done .habit-check{border-color:var(--green);background:var(--green-dim)}
+.habit-row.done .habit-check::after{content:'✓';color:var(--green-bright);font-size:0.9rem;font-weight:700}
+
+/* Weekly progress dots */
+.week-dots{display:flex;gap:4px;margin-top:4px;align-items:center}
+.week-dot{width:10px;height:10px;border-radius:50%;background:rgba(42,184,204,0.1);border:1px solid rgba(42,184,204,0.15)}
+.week-dot.filled{background:var(--green);border-color:var(--green)}
+.week-count{font-size:0.68rem;color:rgba(42,184,204,0.5);margin-left:6px}
+.week-count.met{color:var(--green-bright)}
+
+/* Weekly summary bar */
+.week-summary{background:var(--ink2);border:1px solid rgba(42,184,204,0.12);border-radius:10px;padding:14px;margin-top:20px}
+.ws-title{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:rgba(42,184,204,0.6);margin-bottom:12px}
+.ws-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px}
+.ws-day-label{font-size:0.6rem;text-align:center;color:rgba(42,184,204,0.45);padding-bottom:4px}
+.ws-cell{width:100%;aspect-ratio:1;border-radius:4px;background:rgba(42,184,204,0.04);border:1px solid rgba(42,184,204,0.08)}
+.ws-cell.has-data{background:var(--green-dim);border-color:rgba(76,175,80,0.3)}
+.ws-cell.today{border-color:var(--teal)}
+.ws-score{font-size:0.72rem;color:rgba(42,184,204,0.5);text-align:center;margin-top:6px}
+.ws-score span{color:var(--green-bright);font-weight:600}
+
+/* Gold divider */
+.gold-line{height:1px;background:linear-gradient(90deg,transparent,rgba(42,184,204,0.45),transparent);margin:6px 0}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink3);border:1px solid var(--green);color:var(--green-bright);padding:8px 20px;border-radius:20px;font-size:0.82rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.toast.show{opacity:1}
+
+/* History tab */
+#tab-bar{display:flex;gap:0;margin-bottom:16px}
+.tab-btn{flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;font-family:'Crimson Pro',serif;font-size:0.78rem;letter-spacing:1px;text-transform:uppercase;color:rgba(42,184,204,0.55);cursor:pointer;transition:all .2s}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-view{display:none}
+.tab-view.active{display:block}
+
+/* History calendar */
+.hist-week{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.hist-date{font-size:0.68rem;color:rgba(42,184,204,0.45);width:70px;text-align:right;flex-shrink:0}
+.hist-bar{flex:1;height:22px;background:rgba(42,184,204,0.04);border-radius:4px;position:relative;overflow:hidden}
+.hist-fill{height:100%;border-radius:4px;transition:width .3s}
+.hist-fill.good{background:rgba(76,175,80,0.35)}
+.hist-fill.mid{background:rgba(255,183,77,0.35)}
+.hist-fill.low{background:rgba(192,57,43,0.2)}
+.hist-label{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:0.62rem;color:var(--parchment-dim)}
+</style>
+</head>
+<body>
+<div id="header"><h1>Daily</h1></div>
+<div id="main">
+  <div id="tab-bar">
+    <button class="tab-btn active" onclick="showTab('today')">Today</button>
+    <button class="tab-btn" onclick="showTab('history')">History</button>
+  </div>
+
+  <div id="tab-today" class="tab-view active">
+    <div class="date-nav">
+      <button onclick="changeDay(-1)">‹</button>
+      <div>
+        <div class="date-label" id="dateLabel"></div>
+        <div class="date-sub" id="dateSub"></div>
+      </div>
+      <button onclick="changeDay(1)" id="fwdBtn">›</button>
+    </div>
+
+    <div class="section-title">Daily habits</div>
+    <div id="dailyList"></div>
+
+    <div class="gold-line"></div>
+    <div class="section-title">Weekly targets</div>
+    <div id="weeklyList"></div>
+
+    <div class="week-summary" id="weekSummary"></div>
+  </div>
+
+  <div id="tab-history" class="tab-view">
+    <div class="section-title">Last 28 days</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'daily_v1';
+const DAILY_HABITS = [
+  {id:'bible', name:'Bible', icon:'📖', target:'daily'},
+  {id:'read', name:'Read 10 pages', icon:'📚', target:'daily'},
+  {id:'nophone', name:'No phone night', icon:'📵', target:'daily'},
+  {id:'bed', name:'Bed by 10.45pm', icon:'🛏️', target:'daily'},
+  {id:'sleep', name:'Pilot sleep technique', icon:'😴', target:'daily'},
+];
+const WEEKLY_HABITS = [
+  {id:'cross', name:'Cross trainer', icon:'🚴', target:3},
+  {id:'sauna', name:'Sauna', icon:'🔥', target:4},
+  {id:'ankle', name:'Ankle rehab', icon:'🦵', target:3},
+  {id:'weights', name:'Weights', icon:'🏋️', target:3},
+  {id:'grip', name:'Grip', icon:'✊', target:4},
+];
+const ALL_HABITS = [...DAILY_HABITS, ...WEEKLY_HABITS];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let currentDate = new Date();
+resetToMidnight(currentDate);
+
+function resetToMidnight(d){ d.setHours(0,0,0,0); return d; }
+function dateKey(d){ return d.toISOString().slice(0,10); }
+function today(){ const d=new Date(); resetToMidnight(d); return d; }
+function isSameDay(a,b){ return dateKey(a)===dateKey(b); }
+function isToday(d){ return isSameDay(d, today()); }
+
+function getMonday(d){
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day===0?-6:1);
+  const mon = new Date(d);
+  mon.setDate(diff);
+  resetToMidnight(mon);
+  return mon;
+}
+
+function ld(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}} }
+function sv(d){ localStorage.setItem(STORAGE_KEY, JSON.stringify(d)) }
+
+function getDayData(dateStr){
+  const d = ld();
+  return (d.days && d.days[dateStr]) || {};
+}
+function setHabit(dateStr, habitId, val){
+  const d = ld();
+  if(!d.days) d.days={};
+  if(!d.days[dateStr]) d.days[dateStr]={};
+  d.days[dateStr][habitId] = val;
+  sv(d);
+}
+
+function getWeekCount(habitId, refDate){
+  const mon = getMonday(refDate);
+  let count = 0;
+  for(let i=0;i<7;i++){
+    const day = new Date(mon);
+    day.setDate(mon.getDate()+i);
+    const dd = getDayData(dateKey(day));
+    if(dd[habitId]) count++;
+  }
+  return count;
+}
+
+function toggleHabit(habitId){
+  const dk = dateKey(currentDate);
+  const dd = getDayData(dk);
+  const current = dd[habitId] || false;
+  setHabit(dk, habitId, !current);
+  render();
+  if(!current) toast('✓');
+}
+
+function render(){
+  const dk = dateKey(currentDate);
+  const dd = getDayData(dk);
+
+  // Date label
+  const opts = {weekday:'long', day:'numeric', month:'long'};
+  document.getElementById('dateLabel').textContent = isToday(currentDate) ? 'Today' : currentDate.toLocaleDateString('en-GB', opts);
+  document.getElementById('dateSub').textContent = isToday(currentDate) ? currentDate.toLocaleDateString('en-GB', opts) : '';
+  document.getElementById('fwdBtn').disabled = isToday(currentDate);
+
+  // Daily habits
+  let dailyHtml = '';
+  DAILY_HABITS.forEach(h => {
+    const done = dd[h.id] || false;
+    dailyHtml += `
+      <div class="habit-row${done?' done':''}" onclick="toggleHabit('${h.id}')">
+        <div class="habit-icon">${h.icon}</div>
+        <div class="habit-info">
+          <div class="habit-name">${h.name}</div>
+        </div>
+        <div class="habit-check"></div>
+      </div>`;
+  });
+  document.getElementById('dailyList').innerHTML = dailyHtml;
+
+  // Weekly habits
+  let weeklyHtml = '';
+  WEEKLY_HABITS.forEach(h => {
+    const done = dd[h.id] || false;
+    const count = getWeekCount(h.id, currentDate);
+    const met = count >= h.target;
+    let dots = '';
+    for(let i=0;i<h.target;i++){
+      dots += `<div class="week-dot${i<count?' filled':''}"></div>`;
+    }
+    weeklyHtml += `
+      <div class="habit-row${done?' done':''}" onclick="toggleHabit('${h.id}')">
+        <div class="habit-icon">${h.icon}</div>
+        <div class="habit-info">
+          <div class="habit-name">${h.name}</div>
+          <div class="week-dots">${dots}<span class="week-count${met?' met':''}">${count}/${h.target}</span></div>
+        </div>
+        <div class="habit-check"></div>
+      </div>`;
+  });
+  document.getElementById('weeklyList').innerHTML = weeklyHtml;
+
+  // Week summary
+  renderWeekSummary();
+}
+
+function renderWeekSummary(){
+  const mon = getMonday(currentDate);
+  let html = '<div class="ws-title">This week</div><div class="ws-grid">';
+  // Day labels
+  const dayLabels = ['M','T','W','T','F','S','S'];
+  dayLabels.forEach(l => { html += `<div class="ws-day-label">${l}</div>`; });
+
+  let totalDone = 0, totalPossible = 0;
+  for(let i=0;i<7;i++){
+    const day = new Date(mon);
+    day.setDate(mon.getDate()+i);
+    const dd = getDayData(dateKey(day));
+    const count = ALL_HABITS.filter(h => dd[h.id]).length;
+    const isT = isSameDay(day, today());
+    const hasFuture = day > today();
+    if(!hasFuture){
+      totalDone += count;
+      totalPossible += ALL_HABITS.length;
+    }
+    html += `<div class="ws-cell${count>0?' has-data':''}${isT?' today':''}" title="${count}/${ALL_HABITS.length}"></div>`;
+  }
+  html += '</div>';
+  if(totalPossible > 0){
+    const pct = Math.round((totalDone/totalPossible)*100);
+    html += `<div class="ws-score">Week completion: <span>${pct}%</span></div>`;
+  }
+  document.getElementById('weekSummary').innerHTML = html;
+}
+
+function renderHistory(){
+  let html = '';
+  const t = today();
+  for(let i=0;i<28;i++){
+    const day = new Date(t);
+    day.setDate(t.getDate()-i);
+    const dd = getDayData(dateKey(day));
+    const count = ALL_HABITS.filter(h => dd[h.id]).length;
+    const total = ALL_HABITS.length;
+    const pct = total>0 ? Math.round((count/total)*100) : 0;
+    const cls = pct>=70?'good':pct>=40?'mid':'low';
+    const label = day.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    html += `
+      <div class="hist-week">
+        <div class="hist-date">${label}</div>
+        <div class="hist-bar">
+          <div class="hist-fill ${cls}" style="width:${pct}%"></div>
+          <div class="hist-label">${count}/${total}</div>
+        </div>
+      </div>`;
+  }
+  document.getElementById('historyList').innerHTML = html;
+}
+
+function changeDay(delta){
+  currentDate.setDate(currentDate.getDate()+delta);
+  if(currentDate > today()) currentDate = today();
+  render();
+}
+
+function showTab(tab){
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (tab==='today'&&i===0)||(tab==='history'&&i===1));
+  });
+  document.getElementById('tab-today').classList.toggle('active', tab==='today');
+  document.getElementById('tab-history').classList.toggle('active', tab==='history');
+  if(tab==='history') renderHistory();
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),800);
+}
+
+// Service worker for offline
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('data:text/javascript,self.addEventListener("fetch",e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))))').catch(()=>{});
+}
+
+render();
+</script>
+</body>
+</html>
