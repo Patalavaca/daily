@@ -47,6 +47,7 @@ html,body{height:100%;background:var(--ink);font-family:'Crimson Pro',serif;colo
 .week-dots{display:flex;gap:4px;margin-top:4px;align-items:center}
 .week-dot{width:10px;height:10px;border-radius:50%;background:rgba(42,184,204,0.1);border:1px solid rgba(42,184,204,0.15)}
 .week-dot.filled{background:var(--green);border-color:var(--green)}
+.week-dot.bonus{background:rgba(42,184,204,0.25);border-color:var(--green-bright)}
 .week-count{font-size:0.68rem;color:rgba(42,184,204,0.5);margin-left:6px}
 .week-count.met{color:var(--green-bright)}
 
@@ -161,6 +162,7 @@ const DAILY_HABITS = [
   {id:'pectasol', name:'PectaSol-C', icon:'💊', target:'daily'},
   {id:'steps', name:'10k steps', icon:'🚶', target:'daily'},
   {id:'social', name:'Social media ≤15 mins', icon:'📱', target:'daily'},
+  {id:'jaw', name:'Jaw stretch', icon:'🦷', target:'daily'},
 ];
 const WEEKLY_HABITS = [
   {id:'cross', name:'Cross trainer', icon:'🚴', target:3},
@@ -260,6 +262,10 @@ function render(){
     let dots = '';
     for(let i=0;i<h.target;i++){
       dots += `<div class="week-dot${i<count?' filled':''}"></div>`;
+    }
+    const bonus = count - h.target;
+    for(let i=0;i<bonus;i++){
+      dots += `<div class="week-dot bonus filled"></div>`;
     }
     weeklyHtml += `
       <div class="habit-row${done?' done':''}" onclick="toggleHabit('${h.id}')">
